@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartCart Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="ambient ambient-a"></div>
+<div class="ambient ambient-b"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">SC</div>
+    <div>
+      <div class="brand-name">SmartCart</div>
+      <div class="brand-sub">Customer Intelligence</div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <span class="status-dot"></span>
+    <span>ML Engine Online</span>
+  </div>
+</header>
+
+<main class="shell">
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">UNSUPERVISED ML • CUSTOMER SEGMENTATION</span>
+      <h1>See the <span>hidden groups</span><br>inside your customers.</h1>
+      <p>
+        An interactive customer-segmentation cockpit built from your SmartCart
+        clustering pipeline. Explore behavioral clusters, PCA space, model quality,
+        and customer-level insights.
+      </p>
+      <div class="hero-pills">
+        <span>2240 original rows</span>
+        <span>Feature engineering</span>
+        <span>3D PCA</span>
+        <span>K-Means + Agglomerative</span>
+      </div>
+    </div>
+
+    <div class="hero-orbit">
+      <div class="orbit-ring ring-1"></div>
+      <div class="orbit-ring ring-2"></div>
+      <div class="orbit-ring ring-3"></div>
+      <div class="orbit-core">ML<br><small>CLUSTERS</small></div>
+      <div class="orbit-node n1"></div>
+      <div class="orbit-node n2"></div>
+      <div class="orbit-node n3"></div>
+      <div class="orbit-node n4"></div>
+    </div>
+  </section>
+
+  <section class="control-panel glass">
+    <div class="control-group">
+      <label>Clustering engine</label>
+      <div class="segmented">
+        <button class="model-btn active" data-model="kmeans">K-Means</button>
+        <button class="model-btn" data-model="agglomerative">Agglomerative</button>
+      </div>
+    </div>
+
+    <div class="control-group k-control">
+      <label>Number of clusters <b id="kValue">4</b></label>
+      <input id="kSlider" type="range" min="2" max="10" value="4">
+    </div>
+
+    <button id="refreshBtn" class="primary-btn">
+      <span>Run analysis</span>
+      <span class="arrow">→</span>
+    </button>
+  </section>
+
+  <section class="metric-grid">
+    <div class="metric glass">
+      <span class="metric-label">CUSTOMERS ANALYZED</span>
+      <strong id="mCustomers">—</strong>
+      <span class="metric-note">after preprocessing</span>
+    </div>
+    <div class="metric glass">
+      <span class="metric-label">CLUSTERS</span>
+      <strong id="mClusters">—</strong>
+      <span class="metric-note" id="mModel">K-Means</span>
+    </div>
+    <div class="metric glass">
+      <span class="metric-label">SILHOUETTE SCORE</span>
+      <strong id="mSilhouette">—</strong>
+      <span class="metric-note">cluster separation signal</span>
+    </div>
+    <div class="metric glass">
+      <span class="metric-label">PCA INFORMATION</span>
+      <strong id="mPca">—</strong>
+      <span class="metric-note">first 3 components</span>
+    </div>
+  </section>
+
+  <section class="dashboard-grid">
+    <div class="card glass wide">
+      <div class="card-head">
+        <div>
+          <span class="eyebrow">LATENT SPACE</span>
+          <h2>Customer constellation</h2>
+          <p>Each point is a customer. Hover to inspect their cluster and PCA position.</p>
+        </div>
+        <span class="tag">3D PCA</span>
+      </div>
+      <div id="scatter3d" class="plot"></div>
+    </div>
+
+    <div class="card glass">
+      <div class="card-head">
+        <div>
+          <span class="eyebrow">DISTRIBUTION</span>
+          <h2>Cluster population</h2>
+        </div>
+      </div>
+      <div id="clusterBar" class="plot small"></div>
+    </div>
+
+    <div class="card glass">
+      <div class="card-head">
+        <div>
+          <span class="eyebrow">MODEL DIAGNOSTICS</span>
+          <h2>Elbow curve</h2>
+          <p>WCSS across K values.</p>
+        </div>
+      </div>
+      <div id="elbow" class="plot small"></div>
+    </div>
+
+    <div class="card glass wide">
+      <div class="card-head">
+        <div>
+          <span class="eyebrow">MODEL DIAGNOSTICS</span>
+          <h2>Silhouette landscape</h2>
+          <p>Compare separation quality as the number of clusters changes.</p>
+        </div>
+      </div>
+      <div id="silhouette" class="plot"></div>
+    </div>
+  </section>
+
+  <section class="card glass">
+    <div class="card-head">
+      <div>
+        <span class="eyebrow">SEGMENT INTELLIGENCE</span>
+        <h2>What does each cluster look like?</h2>
+        <p>Cluster averages make the unsupervised result interpretable.</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Cluster</th>
+            <th>Customers</th>
+            <th>Avg. Income</th>
+            <th>Avg. Spending</th>
+            <th>Avg. Recency</th>
+            <th>Avg. Age</th>
+          </tr>
+        </thead>
+        <tbody id="summaryBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="customer-section">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">CUSTOMER EXPLORER</span>
+        <h2>Inspect a customer</h2>
+      </div>
+      <div class="search-box">
+        <input id="customerId" type="number" placeholder="Enter customer ID, e.g. 5524">
+        <button id="inspectBtn">Inspect</button>
+      </div>
+    </div>
+
+    <div id="customerPanel" class="customer-panel glass hidden">
+      <div class="customer-main">
+        <div class="avatar" id="customerAvatar">C</div>
+        <div>
+          <span class="eyebrow">CUSTOMER</span>
+          <h2 id="customerTitle">—</h2>
+          <p id="customerSegment">—</p>
+        </div>
+      </div>
+      <div class="customer-stats" id="customerStats"></div>
+      <div class="cluster-insight">
+        <span class="eyebrow">CLUSTER CONTEXT</span>
+        <p id="clusterContext">—</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>SmartCart Intelligence</span>
+    <span>Flask • Pandas • Scikit-learn • Plotly</span>
+  </footer>
+</main>
+
+<div id="toast" class="toast"></div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
